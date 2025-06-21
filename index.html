@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Notas de Examen</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .share-section {
+            width: 100%;
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .share-section h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .url-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .url-display {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #90caf9;
+            border-radius: 6px;
+            background: white;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, #2196f3 0%, #21cbf3 100%);
+            white-space: nowrap;
+        }
+
+        .share-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            color: #856404;
+            font-size: 14px;
+        }
+
+        .share-warning strong {
+            color: #d63031;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .control-group input, .control-group button {
+            padding: 12px 20px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .control-group input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .question-number {
+            background: #e9ecef !important;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .correct-answer {
+            background: #d4edda !important;
+            color: #155724;
+            font-weight: 600;
+        }
+
+        .student-input {
+            width: 60px;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .student-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 2px rgba(79, 172, 254, 0.1);
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .student-stats {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-left: 5px solid #4facfe;
+            transition: transform 0.3s ease;
+        }
+
+        .student-stats:hover {
+            transform: translateY(-5px);
+        }
+
+        .student-stats h3 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .student-stats h3::before {
+            content: "👨‍🎓";
+            font-size: 1.5em;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-weight: 600;
+            color: #6c757d;
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: white;
+        }
+
+        .stat-value.aciertos {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .stat-value.fallos {
+            background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+        }
+
+        .stat-value.sin-contestar {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            color: #2d3436;
+        }
+
+        .stat-value.nota {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-size: 1.4em;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .control-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .header p {
+                font-size: 1em;
+            }
+
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Calculadora de Notas de Examen</h1>
+            <p>Herramienta para calcular automáticamente las respuestas correctas y notas de los estudiantes</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="numQuestions">Número de preguntas:</label>
+                <input type="number" id="numQuestions" min="1" max="100" value="30">
+                
+                <label for="studentName">Nombre del estudiante:</label>
+                <input type="text" id="studentName" placeholder="Ej: Juan Pérez">
+                
+                <button class="btn btn-add" onclick="addStudent()">Agregar Estudiante</button>
+                <button class="btn" onclick="updateQuestions()">Actualizar Preguntas</button>
+            </div>
+
+            <div class="share-section">
+                <h3>🔗 Compartir Examen</h3>
+                <div class="url-container">
+                    <input type="text" class="url-display" id="shareUrl" readonly placeholder="Agrega estudiantes para generar enlace...">
+                    <button class="btn btn-copy" onclick="copyShareUrl()">📋 Copiar Enlace</button>
+                </div>
+                <div class="share-warning">
+                    <strong>⚠️ Importante:</strong> Si modificas los datos (agregas estudiantes o cambias respuestas), deberás copiar el nuevo enlace actualizado para compartir los cambios con tus compañeros.
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div id="tableContainer" class="table-container">
+                <!-- La tabla se generará aquí -->
+            </div>
+
+            <div id="statsContainer" class="stats-section">
+                <!-- Las estadísticas se mostrarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let students = [];
+        let numQuestions = 30;
+        let studentAnswers = {}; // Almacenar respuestas de estudiantes
+
+        function updateQuestions() {
+            const input = document.getElementById('numQuestions');
+            const newNumQuestions = parseInt(input.value) || 30;
+            
+            // Guardar respuestas actuales antes de cambiar el número de preguntas
+            saveCurrentAnswers();
+            
+            numQuestions = newNumQuestions;
+            generateTable();
+            loadSavedAnswers();
+            calculateStats();
+            updateShareUrl(); // Actualizar URL cuando cambian las preguntas
+        }
+
+        function addStudent() {
+            const input = document.getElementById('studentName');
+            const name = input.value.trim();
+            
+            if (name && !students.includes(name)) {
+                // Guardar respuestas actuales antes de agregar estudiante
+                saveCurrentAnswers();
+                
+                students.push(name);
+                input.value = '';
+                generateTable();
+                
+                // Restaurar respuestas después de generar la tabla
+                loadSavedAnswers();
+                calculateStats();
+                updateShareUrl(); // Actualizar URL cuando se agrega estudiante
+            } else if (students.includes(name)) {
+                alert('Este estudiante ya existe');
+            } else {
+                alert('Por favor ingresa un nombre válido');
+            }
+        }
+
+        function generateTable() {
+            const container = document.getElementById('tableContainer');
+            
+            if (students.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>👋 ¡Empecemos!</h3>
+                        <p>Agrega estudiantes para comenzar a evaluar el examen</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pregunta</th>
+                            <th>Respuesta Correcta</th>
+                            ${students.map(student => `<th>${student}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            for (let i = 1; i <= numQuestions; i++) {
+                html += `
+                    <tr>
+                        <td class="question-number">${i}</td>
+                        <td class="correct-answer" id="correct-${i}">-</td>
+                        ${students.map(student => `
+                            <td>
+                                <input type="text" class="student-input" 
+                                       maxlength="1" 
+                                       oninput="handleInput(this, ${i}, '${student}')"
+                                       onkeydown="handleKeyDown(event, this, ${i}, '${student}')"
+                                       data-question="${i}" 
+                                       data-student="${student}"
+                                       value="">
+                            </td>
+                        `).join('')}
+                    </tr>
+                `;
+            }
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function saveCurrentAnswers() {
+            // Guardar todas las respuestas actuales en el objeto studentAnswers
+            students.forEach(student => {
+                if (!studentAnswers[student]) {
+                    studentAnswers[student] = {};
+                }
+                for (let i = 1; i <= numQuestions; i++) {
+                    const input = document.querySelector(`input[data-question="${i}"][data-student="${student}"]`);
+                    if (input && input.value.trim()) {
+                        studentAnswers[student][i] = input.value.trim();
+                    }
+                }
+            });
+        }
+
+        function loadSavedAnswers() {
+            // Restaurar todas las respuestas guardadas
+            students.forEach(student => {
+                if (studentAnswers[student]) {
+                    for (let i = 1; i <= numQuestions; i++) {
+                        const input = document.querySelector(`input[data-question="${i}"][data-student="${student}"]`);
+                        if (input && studentAnswers[student][i]) {
+                            input.value = studentAnswers[student][i];
+                        }
+                    }
+                }
+            });
+            calculateCorrectAnswers();
+        }
+
+        function handleInput(input, question, student) {
+            const value = input.value.toUpperCase();
+            if (value && !/^[ABCD]$/.test(value)) {
+                input.value = '';
+                return;
+            }
+            input.value = value;
+            
+            // Guardar la respuesta inmediatamente
+            if (!studentAnswers[student]) {
+                studentAnswers[student] = {};
+            }
+            studentAnswers[student][question] = value;
+            
+            calculateCorrectAnswers();
+            calculateStats();
+            updateShareUrl(); // Actualizar URL automáticamente
+        }
+
+        function handleKeyDown(event, input, question, student) {
+            if (event.key === 'Tab') {
+                event.preventDefault();
+                moveToNextInput(input, question, student, event.shiftKey);
+            } else if (event.key === 'Enter') {
+                event.preventDefault();
+                moveToNextInput(input, question, student, false);
+            } else if (event.ctrlKey && event.key === 'v') {
+                // Manejar pegado con Ctrl+V
+                event.preventDefault();
+                handlePaste(event, student);
+            }
+        }
+
+        function handlePaste(event, student) {
+            // Obtener datos del portapapeles
+            navigator.clipboard.readText().then(text => {
+                processPastedData(text, student);
+            }).catch(err => {
+                // Fallback para navegadores que no soportan clipboard API
+                console.log('Clipboard API no disponible, usando evento paste tradicional');
+            });
+        }
+
+        function processPastedData(text, student) {
+            if (!text || !text.trim()) return;
+
+            // Limpiar y normalizar el texto
+            const cleanText = text.trim();
+            
+            // Detectar diferentes separadores y convertir a array
+            let responses = [];
+            
+            // Primero intentar detectar si hay saltos de línea (copiar columna de Excel)
+            if (cleanText.includes('\n')) {
+                responses = cleanText.split('\n').map(line => line.trim());
+            } 
+            // Si hay tabs (copiar fila de Excel)
+            else if (cleanText.includes('\t')) {
+                responses = cleanText.split('\t').map(item => item.trim());
+            }
+            // Si hay comas
+            else if (cleanText.includes(',')) {
+                responses = cleanText.split(',').map(item => item.trim());
+            }
+            // Si hay punto y coma
+            else if (cleanText.includes(';')) {
+                responses = cleanText.split(';').map(item => item.trim());
+            }
+            // Si solo hay espacios
+            else {
+                responses = cleanText.split(/\s+/).filter(item => item.length > 0);
+            }
+
+            // Limpiar respuestas: solo A, B, C, D o vacío
+            responses = responses.map(response => {
+                const clean = response.toUpperCase().trim();
+                if (/^[ABCD]$/.test(clean)) {
+                    return clean;
+                } else if (clean === '' || clean === '-' || clean === '_') {
+                    return '';
+                } else {
+                    // Si no es una respuesta válida, dejar vacío
+                    return '';
+                }
+            });
+
+            // Aplicar respuestas al estudiante (máximo numQuestions)
+            const maxResponses = Math.min(responses.length, numQuestions);
+            
+            for (let i = 0; i < maxResponses; i++) {
+                const questionNum = i + 1;
+                const input = document.querySelector(`input[data-question="${questionNum}"][data-student="${student}"]`);
+                
+                if (input) {
+                    input.value = responses[i];
+                    
+                    // Guardar en el objeto de respuestas
+                    if (!studentAnswers[student]) {
+                        studentAnswers[student] = {};
+                    }
+                    if (responses[i]) {
+                        studentAnswers[student][questionNum] = responses[i];
+                    } else {
+                        // Si está vacío, eliminar del objeto
+                        delete studentAnswers[student][questionNum];
+                    }
+                }
+            }
+
+            // Recalcular todo
+            calculateCorrectAnswers();
+            calculateStats();
+            updateShareUrl();
+
+            // Mostrar mensaje de confirmación
+            showPasteMessage(maxResponses, responses.length, student);
+        }
+
+        function showPasteMessage(applied, total, student) {
+            const message = document.createElement('div');
+            message.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 1000;
+                font-weight: 600;
+                max-width: 300px;
+            `;
+            
+            let messageText = `✅ Pegadas ${applied} respuestas para ${student}`;
+            if (total > applied) {
+                messageText += `\n(${total - applied} respuestas descartadas)`;
+            }
+            
+            message.textContent = messageText;
+            message.style.whiteSpace = 'pre-line';
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.remove();
+            }, 3000);
+        }
+
+        function moveToNextInput(currentInput, question, student, reverse = false) {
+            if (reverse) {
+                // Shift+Tab: ir a la pregunta anterior del mismo estudiante
+                const prevQuestion = question - 1;
+                if (prevQuestion >= 1) {
+                    const prevInput = document.querySelector(`input[data-question="${prevQuestion}"][data-student="${student}"]`);
+                    if (prevInput) {
+                        prevInput.focus();
+                        prevInput.select();
+                        return;
+                    }
+                }
+                // Si estamos en la primera pregunta, ir al último estudiante anterior
+                const studentIndex = students.indexOf(student);
+                if (studentIndex > 0) {
+                    const prevStudent = students[studentIndex - 1];
+                    const lastQuestionInput = document.querySelector(`input[data-question="${numQuestions}"][data-student="${prevStudent}"]`);
+                    if (lastQuestionInput) {
+                        lastQuestionInput.focus();
+                        lastQuestionInput.select();
+                    }
+                }
+            } else {
+                // Tab o Enter: ir a la siguiente pregunta del mismo estudiante
+                const nextQuestion = question + 1;
+                if (nextQuestion <= numQuestions) {
+                    const nextInput = document.querySelector(`input[data-question="${nextQuestion}"][data-student="${student}"]`);
+                    if (nextInput) {
+                        nextInput.focus();
+                        nextInput.select();
+                        return;
+                    }
+                }
+                // Si estamos en la última pregunta, ir al primer estudiante siguiente
+                const studentIndex = students.indexOf(student);
+                if (studentIndex < students.length - 1) {
+                    const nextStudent = students[studentIndex + 1];
+                    const firstQuestionInput = document.querySelector(`input[data-question="1"][data-student="${nextStudent}"]`);
+                    if (firstQuestionInput) {
+                        firstQuestionInput.focus();
+                        firstQuestionInput.select();
+                    }
+                }
+            }
+        }
+
+        function calculateCorrectAnswers() {
+            for (let i = 1; i <= numQuestions; i++) {
+                const answers = [];
+                
+                // Recopilar todas las respuestas para esta pregunta
+                students.forEach(student => {
+                    const input = document.querySelector(`input[data-question="${i}"][data-student="${student}"]`);
+                    if (input && input.value.trim()) {
+                        answers.push(input.value.trim());
+                    }
+                });
+
+                // Calcular la respuesta más frecuente
+                let correctAnswer = 'Empate / vacío';
+                if (answers.length > 0) {
+                    const frequency = {};
+                    answers.forEach(answer => {
+                        frequency[answer] = (frequency[answer] || 0) + 1;
+                    });
+
+                    const maxFreq = Math.max(...Object.values(frequency));
+                    const mostFrequent = Object.keys(frequency).filter(key => frequency[key] === maxFreq);
+                    
+                    if (mostFrequent.length === 1) {
+                        correctAnswer = mostFrequent[0];
+                    }
+                }
+
+                document.getElementById(`correct-${i}`).textContent = correctAnswer;
+            }
+        }
+
+        function calculateStats() {
+            const statsContainer = document.getElementById('statsContainer');
+            
+            if (students.length === 0) {
+                statsContainer.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+
+            students.forEach(student => {
+                let aciertos = 0;
+                let fallos = 0;
+                let sinContestar = 0;
+
+                for (let i = 1; i <= numQuestions; i++) {
+                    const input = document.querySelector(`input[data-question="${i}"][data-student="${student}"]`);
+                    const correctAnswer = document.getElementById(`correct-${i}`).textContent;
+                    const studentAnswer = input ? input.value.trim() : '';
+
+                    if (!studentAnswer) {
+                        sinContestar++;
+                    } else if (correctAnswer !== 'Empate / vacío' && studentAnswer === correctAnswer) {
+                        aciertos++;
+                    } else if (correctAnswer !== 'Empate / vacío') {
+                        fallos++;
+                    }
+                }
+
+                // Fórmula de nota: (aciertos - (fallos * 0.33)) / 3
+                const nota = Math.max(0, (aciertos - (fallos * 0.33)) / 3);
+
+                html += `
+                    <div class="student-stats">
+                        <h3>${student}</h3>
+                        <div class="stat-row">
+                            <span class="stat-label">Aciertos</span>
+                            <span class="stat-value aciertos">${aciertos}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Fallos</span>
+                            <span class="stat-value fallos">${fallos}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Sin Contestar</span>
+                            <span class="stat-value sin-contestar">${sinContestar}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Nota Final</span>
+                            <span class="stat-value nota">${nota.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            statsContainer.innerHTML = html;
+        }
+
+        function updateShareUrl() {
+            const shareUrlInput = document.getElementById('shareUrl');
+            
+            if (students.length === 0) {
+                shareUrlInput.placeholder = "Agrega estudiantes para generar enlace...";
+                shareUrlInput.value = "";
+                return;
+            }
+
+            // Crear objeto con todos los datos
+            const shareData = {
+                students: students,
+                numQuestions: numQuestions,
+                answers: studentAnswers
+            };
+
+            // Codificar en base64 para la URL
+            const encodedData = btoa(JSON.stringify(shareData));
+            
+            // Detectar automáticamente la URL base real
+            let baseUrl;
+            
+            // Detectar si estamos en un artifact público de Claude
+            if (window.location.href.includes('claude.ai/public/artifacts/')) {
+                // Usar la URL completa del artifact público
+                baseUrl = window.location.href.split('#')[0];
+            } else if (window.location.href.includes('about:srcdoc') || 
+                       window.location.href.includes('claude.ai') ||
+                       window.location.protocol === 'about:') {
+                
+                // Para otros entornos especiales, usar estructura genérica
+                baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.pathname}`;
+                
+                // Si los valores no son útiles, usar URL relativa
+                if (baseUrl.includes('about:') || !window.location.hostname) {
+                    baseUrl = "./index.html";
+                }
+            } else {
+                // URL normal - usar tal como está
+                baseUrl = `${window.location.origin}${window.location.pathname}`;
+            }
+            
+            // Limpiar cualquier hash existente de la URL base
+            baseUrl = baseUrl.split('#')[0];
+            
+            const shareUrl = `${baseUrl}#data=${encodedData}`;
+            
+            shareUrlInput.value = shareUrl;
+            shareUrlInput.placeholder = "";
+        }
+
+        function copyShareUrl() {
+            const shareUrlInput = document.getElementById('shareUrl');
+            
+            if (!shareUrlInput.value) {
+                alert('Primero agrega estudiantes para generar un enlace');
+                return;
+            }
+
+            shareUrlInput.select();
+            shareUrlInput.setSelectionRange(0, 99999); // Para móviles
+
+            try {
+                document.execCommand('copy');
+                
+                // Feedback visual
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = '✅ ¡Copiado!';
+                button.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = 'linear-gradient(135deg, #2196f3 0%, #21cbf3 100%)';
+                }, 2000);
+                
+            } catch (err) {
+                // Fallback para navegadores que no soportan execCommand
+                alert('Enlace generado. Cópialo manualmente desde el campo de texto.');
+            }
+        }
+
+        function loadDataFromUrl() {
+            const hash = window.location.hash;
+            
+            if (hash.startsWith('#data=')) {
+                try {
+                    const encodedData = hash.substring(6); // Quitar '#data='
+                    const decodedData = atob(encodedData);
+                    const shareData = JSON.parse(decodedData);
+                    
+                    // Cargar datos compartidos
+                    students = shareData.students || [];
+                    numQuestions = shareData.numQuestions || 30;
+                    studentAnswers = shareData.answers || {};
+                    
+                    // Actualizar interfaz
+                    document.getElementById('numQuestions').value = numQuestions;
+                    generateTable();
+                    loadSavedAnswers();
+                    calculateStats();
+                    updateShareUrl();
+                    
+                    // Mostrar mensaje de confirmación
+                    showLoadMessage();
+                    
+                } catch (error) {
+                    console.error('Error al cargar datos compartidos:', error);
+                    alert('Error al cargar los datos del enlace. El enlace puede estar dañado.');
+                }
+            }
+        }
+
+        function showLoadMessage() {
+            // Crear mensaje temporal
+            const message = document.createElement('div');
+            message.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 1000;
+                font-weight: 600;
+            `;
+            message.textContent = '✅ Datos cargados correctamente desde el enlace compartido';
+            document.body.appendChild(message);
+            
+            // Remover después de 3 segundos
+            setTimeout(() => {
+                message.remove();
+            }, 3000);
+        }
+
+        // Inicializar la aplicación
+        loadDataFromUrl(); // Cargar datos de URL si existen
+        generateTable();
+        updateShareUrl();
+    </script>
+</body>
+</html>
